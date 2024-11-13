@@ -1,4 +1,4 @@
-name: Chord.io CI
+name: Chord-io CI
 
 on:
   push:
