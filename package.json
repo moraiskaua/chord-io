@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:fix": "prettier --write ."
+    "lint:fix": "npm run lint -- --fix",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "chord-io": "file:",
