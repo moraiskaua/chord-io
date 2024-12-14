@@ -1,4 +1,4 @@
-import { signInSchema } from '@/app/(auth)/sign-in/use-sign-in-controller';
+import { signInSchema } from '@/app/(auth)/sign-in/_schemas/sign-in-schema';
 import Credentials from 'next-auth/providers/credentials';
 import Discord from 'next-auth/providers/discord';
 import Google from 'next-auth/providers/google';
