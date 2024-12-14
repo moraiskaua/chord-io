@@ -1,18 +1,8 @@
+import { signInAction } from '../_actions/sign-in-action';
 import { useActionState } from 'react';
 import toast from 'react-hot-toast';
 
-interface SignInFormControllerProps {
-  signInAction: (formData: FormData) => Promise<
-    | {
-        error: string;
-      }
-    | undefined
-  >;
-}
-
-export const useSignInFormController = ({
-  signInAction,
-}: SignInFormControllerProps) => {
+export const useSignInFormController = () => {
   const [, dispatchAction, isPending] = useActionState(
     async (prevState: any, formData: FormData) => {
       const response = await signInAction(formData);

@@ -1,23 +1,12 @@
 'use client';
 
-import { useSignInFormController } from './use-sign-in-form-controller';
+import { useSignInFormController } from '../_controllers/use-sign-in-form-controller';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2Icon } from 'lucide-react';
 
-interface SignInFormProps {
-  signInAction: (formData: FormData) => Promise<
-    | {
-        error: string;
-      }
-    | undefined
-  >;
-}
-
-export const SignInForm = ({ signInAction }: SignInFormProps) => {
-  const { isPending, dispatchAction } = useSignInFormController({
-    signInAction,
-  });
+export const SignInForm = () => {
+  const { isPending, dispatchAction } = useSignInFormController();
 
   return (
     <form action={dispatchAction} className="space-y-3">

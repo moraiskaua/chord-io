@@ -1,6 +1,6 @@
 'use client';
 
-import { useSignUpFormController } from './use-sign-up-form-controller';
+import { useSignUpFormController } from '../_controllers/use-sign-up-form-controller';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ROUTES } from '@/constants/routes';
