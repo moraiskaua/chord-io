@@ -1,15 +1,10 @@
-import NextAuth from 'next-auth';
+import { signInSchema } from '@/app/(auth)/sign-in/use-sign-in-controller';
 import Credentials from 'next-auth/providers/credentials';
-import Google from 'next-auth/providers/google';
 import Discord from 'next-auth/providers/discord';
-import { z } from 'zod';
-import { db } from './db';
+import Google from 'next-auth/providers/google';
 import { compare } from 'bcryptjs';
-
-const signInSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
+import NextAuth from 'next-auth';
+import { db } from './db';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
