@@ -1,5 +1,5 @@
 import { signIn } from '@/auth';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { FaGoogle } from 'react-icons/fa';
 import { ButtonHTMLAttributes } from 'react';
 
@@ -14,7 +14,7 @@ export const SignInWithGoogle = (props: SignInWithGoogleProps) => {
         await signIn('google');
       }}
     >
-      <Button variant='destructive' type='submit' className='w-full' {...props}>
+      <Button variant="destructive" type="submit" className="w-full" {...props}>
         <FaGoogle />
         Entrar com Google
       </Button>

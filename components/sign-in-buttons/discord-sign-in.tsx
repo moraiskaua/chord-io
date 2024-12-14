@@ -1,5 +1,5 @@
 import { signIn } from '@/auth';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { FaDiscord } from 'react-icons/fa';
 import { ButtonHTMLAttributes } from 'react';
 
@@ -15,8 +15,8 @@ export const SignInWithDiscord = (props: SignInWithDiscordProps) => {
       }}
     >
       <Button
-        type='submit'
-        className='bg-[#7289da] hover:bg-[#7289da]/80 w-full'
+        type="submit"
+        className="bg-[#7289da] hover:bg-[#7289da]/80 w-full"
         {...props}
       >
         <FaDiscord />
