@@ -20,14 +20,12 @@ export const SignInForm = ({ signInAction }: SignInFormProps) => {
   });
 
   return (
-    <>
-      <form action={dispatchAction}>
-        <Input name="email" type="email" placeholder="E-mail" required />
-        <Input name="password" type="password" placeholder="Senha" required />
-        <Button type="submit" disabled={isPending}>
-          {isPending ? <Loader2Icon /> : 'Entrar'}
-        </Button>
-      </form>
-    </>
+    <form action={dispatchAction} className="space-y-3">
+      <Input name="email" type="email" placeholder="E-mail" required />
+      <Input name="password" type="password" placeholder="Senha" required />
+      <Button type="submit" className="w-full" disabled={isPending}>
+        {isPending ? <Loader2Icon className="animate-spin" /> : 'Entrar'}
+      </Button>
+    </form>
   );
 };

@@ -1,6 +1,7 @@
 import { AuthError, CredentialsSignin } from 'next-auth';
 import { signIn } from '@/lib/auth';
 import { z } from 'zod';
+import { ROUTES } from '@/constants/routes';
 
 export const signInSchema = z.object({
   email: z.string().email(),
@@ -24,7 +25,7 @@ export const useSignInController = () => {
       await signIn('credentials', {
         email,
         password,
-        redirectTo: '/',
+        redirectTo: ROUTES.WELCOME,
       });
     } catch (error) {
       if (error instanceof CredentialsSignin) {
