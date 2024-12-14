@@ -1,4 +1,4 @@
-import { signIn } from '@/auth';
+import { signIn } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { FaGoogle } from 'react-icons/fa';
 import { ButtonHTMLAttributes } from 'react';
