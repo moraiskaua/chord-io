@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import SignInPage from '../(auth)/sign-in/page';
-import SignUpPage from '../(auth)/sign-up/page';
+import SignInPage from './_components/sign-in/page';
+import SignUpPage from './_components/sign-up/page';
 
 const AuthPage = () => {
   return (

@@ -1,13 +1,12 @@
-import { signInSchema } from '@/app/(auth)/sign-in/_schemas/sign-in-schema';
+import { signInSchema } from '@/app/auth/_components/sign-in/_schemas/sign-in-schema';
 import Credentials from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import Discord from 'next-auth/providers/discord';
 import Google from 'next-auth/providers/google';
+import { ROUTES } from '@/constants/routes';
 import { compare } from 'bcryptjs';
 import NextAuth from 'next-auth';
 import { db } from './db';
-import { NextResponse } from 'next/server';
-import { ROUTES } from '@/constants/routes';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
