@@ -3,9 +3,7 @@
 import { useSignUpFormController } from '../_controllers/use-sign-up-form-controller';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ROUTES } from '@/constants/routes';
 import { Loader2Icon } from 'lucide-react';
-import Link from 'next/link';
 
 export const SignUpForm = () => {
   const { isPending, dispatchAction } = useSignUpFormController();
