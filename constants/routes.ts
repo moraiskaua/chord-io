@@ -1,7 +1,6 @@
 export const ROUTES = {
   HOME: '/',
-  SIGN_IN: '/sign-in',
-  SIGN_UP: '/sign-up',
+  AUTH: '/auth',
   FREE_MODE: '/free-mode',
   WELCOME: '/play/welcome',
   DASHBOARD: '/play/dashboard',

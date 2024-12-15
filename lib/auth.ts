@@ -51,6 +51,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Discord,
   ],
   pages: {
-    signIn: '/sign-in',
+    signIn: ROUTES.AUTH,
   },
 });

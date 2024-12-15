@@ -20,10 +20,10 @@ export default auth(request => {
   }
 
   if (!isSignedIn && isPrivatePath) {
-    return NextResponse.redirect(new URL(ROUTES.SIGN_IN, request.nextUrl));
+    return NextResponse.redirect(new URL(ROUTES.AUTH, request.nextUrl));
   }
 });
 
 export const config = {
-  matcher: ['/', '/sign-in', '/sign-up', '/free-mode', '/play/:path*', '/404'],
+  matcher: ['/', '/auth', '/free-mode', '/play/:path*', '/404'],
 };

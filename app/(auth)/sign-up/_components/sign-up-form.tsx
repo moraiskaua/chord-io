@@ -23,10 +23,6 @@ export const SignUpForm = () => {
             ' Criar conta'
           )}
         </Button>
-        Já possui uma conta?{' '}
-        <Link href={ROUTES.SIGN_IN} className="underline">
-          Entrar
-        </Link>
       </div>
     </form>
   );
