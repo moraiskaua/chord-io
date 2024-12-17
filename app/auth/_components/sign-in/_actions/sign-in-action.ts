@@ -20,7 +20,6 @@ export const signInAction = async (formData: FormData) => {
     await signIn('credentials', {
       email,
       password,
-      redirectTo: ROUTES.WELCOME,
     });
   } catch (error) {
     if (error instanceof CredentialsSignin) {
