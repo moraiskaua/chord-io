@@ -2,7 +2,6 @@
 
 import { signIn } from '@/lib/auth';
 import { signInSchema } from '../_schemas/sign-in-schema';
-import { ROUTES } from '@/constants/routes';
 import { AuthError, CredentialsSignin } from 'next-auth';
 
 export const signInAction = async (formData: FormData) => {

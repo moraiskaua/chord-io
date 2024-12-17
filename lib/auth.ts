@@ -7,6 +7,7 @@ import { ROUTES } from '@/constants/routes';
 import { compare } from 'bcryptjs';
 import NextAuth from 'next-auth';
 import { db } from './db';
+import { User } from '@/entities/user';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -67,7 +68,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async jwt({ token, user }) {
       if (user) {
-        token.accounts = user.accounts;
+        token.accounts = (user as User).accounts;
       }
 
       return token;
