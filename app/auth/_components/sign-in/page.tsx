@@ -7,8 +7,8 @@ const SignInPage = () => {
     <div className="h-full w-full space-y-3">
       <h1 className="text-3xl font-bold">Entre para salvar seu progresso.</h1>
       <SignInForm />
-      <SignInWithGoogle />
-      <SignInWithDiscord />
+      <SignInWithGoogle>Entrar com Google</SignInWithGoogle>
+      <SignInWithDiscord>Entrar com Discord</SignInWithDiscord>
     </div>
   );
 };
