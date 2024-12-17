@@ -7,6 +7,7 @@ import { ROUTES } from '@/constants/routes';
 import { compare } from 'bcryptjs';
 import NextAuth from 'next-auth';
 import { db } from './db';
+import { User } from '@/entities/user';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -38,11 +39,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        const accounts = await db.account.findMany({
+          where: { userId: user.id },
+        });
+
         return {
           id: user.id,
           image: user.image,
           name: user.name,
           email: user.email,
+          accounts,
         };
       },
     }),
@@ -51,5 +57,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   pages: {
     signIn: ROUTES.AUTH,
+  },
+  callbacks: {
+    async session({ session, token }) {
+      if (token?.accounts) {
+        session.user.accounts = token.accounts;
+      }
+
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.accounts = (user as User).accounts;
+      }
+
+      return token;
+    },
   },
 });

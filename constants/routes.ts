@@ -2,9 +2,8 @@ export const ROUTES = {
   HOME: '/',
   AUTH: '/auth',
   FREE_MODE: '/free-mode',
-  WELCOME: '/play/welcome',
-  DASHBOARD: '/play/dashboard',
-  PROFILE: '/play/profile',
-  SETTINGS: '/play/settings',
+  PROFILE: '/profile',
+  SETTINGS: '/settings',
+  DASHBOARD: '/dashboard',
   NOT_FOUND: '/404',
 };

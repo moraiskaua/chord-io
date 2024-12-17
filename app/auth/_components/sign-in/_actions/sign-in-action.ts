@@ -2,7 +2,6 @@
 
 import { signIn } from '@/lib/auth';
 import { signInSchema } from '../_schemas/sign-in-schema';
-import { ROUTES } from '@/constants/routes';
 import { AuthError, CredentialsSignin } from 'next-auth';
 
 export const signInAction = async (formData: FormData) => {
@@ -20,7 +19,6 @@ export const signInAction = async (formData: FormData) => {
     await signIn('credentials', {
       email,
       password,
-      redirectTo: ROUTES.WELCOME,
     });
   } catch (error) {
     if (error instanceof CredentialsSignin) {
