@@ -19,7 +19,6 @@ export function GameControls({
   userAnswer,
   gameOver,
   submitting,
-  isArpeggio,
   setIsArpeggio,
   playChordSound,
   checkAnswer,

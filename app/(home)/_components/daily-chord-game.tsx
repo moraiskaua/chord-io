@@ -136,38 +136,6 @@ export default function DailyChordGame() {
     },
   });
 
-  const calculateSimilarity = (
-    answer: string,
-    correctAnswer: string,
-  ): number => {
-    if (!answer || !correctAnswer) return 0;
-
-    const a = answer.toLowerCase();
-    const c = correctAnswer.toLowerCase();
-
-    if (a === c) return 100;
-
-    if (a.charAt(0) === c.charAt(0)) {
-      if (
-        (a.startsWith(c.substring(0, 2)) && c.charAt(1) === '#') ||
-        (a.startsWith(c.substring(0, 2)) && c.charAt(1) === 'b')
-      ) {
-        return 80;
-      }
-      return 60;
-    }
-
-    if (
-      (a.includes('m') && c.includes('m')) ||
-      (a.includes('7') && c.includes('7')) ||
-      (a.includes('dim') && c.includes('dim'))
-    ) {
-      return 40;
-    }
-
-    return 20;
-  };
-
   const checkAnswer = async () => {
     if (!userAnswer) return;
 

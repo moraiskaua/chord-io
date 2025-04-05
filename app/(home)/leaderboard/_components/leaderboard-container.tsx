@@ -71,7 +71,7 @@ export default function LeaderboardContainer() {
 
   useEffect(() => {
     fetchLeaderboard();
-  }, [currentPage, difficulty, timeFrame]);
+  }, [currentPage, difficulty, timeFrame, fetchLeaderboard]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
