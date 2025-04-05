@@ -18,7 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { LeaderboardTable } from './leaderboard-table';
 import { Pagination } from './pagination';
 
@@ -47,7 +47,7 @@ export default function LeaderboardContainer() {
   const [difficulty, setDifficulty] = useState<Difficulty>('all');
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('all');
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
       const { data } = await axios.get('/api/leaderboard', {
@@ -67,11 +67,11 @@ export default function LeaderboardContainer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, difficulty, timeFrame]);
 
   useEffect(() => {
     fetchLeaderboard();
-  }, [currentPage, difficulty, timeFrame, fetchLeaderboard]);
+  }, [fetchLeaderboard]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

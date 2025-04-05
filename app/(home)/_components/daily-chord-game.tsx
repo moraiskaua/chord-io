@@ -14,7 +14,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { DifficultySelector } from './difficulty-selector';
@@ -67,7 +67,7 @@ export default function DailyChordGame() {
     },
   );
 
-  const loadPreviousResults = async () => {
+  const loadPreviousResults = useCallback(async () => {
     try {
       const { data } = await axios.get('/api/user/previous-results');
       if (data.success && data.results) {
@@ -88,7 +88,7 @@ export default function DailyChordGame() {
     } catch (error) {
       console.error('Error loading previous results:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadGameState();
