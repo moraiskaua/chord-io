@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Trophy } from 'lucide-react';
 
-interface LeaderboardEntry {
+export interface LeaderboardEntry {
   id: string;
   username: string;
   userImage: string | null;
@@ -18,8 +18,6 @@ interface LeaderboardEntry {
   timeTaken: number;
   difficulty: string;
   createdAt: string;
-  totalCorrect: number;
-  totalAttempts: number;
   dailyStreak: number;
   avgTime: number;
 }
@@ -43,6 +41,8 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800/30';
       case 'hard':
         return 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800/30';
+      case 'all':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/30';
       default:
         return 'bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400 border-slate-200 dark:border-slate-800/30';
     }
@@ -56,6 +56,8 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
         return 'Médio';
       case 'hard':
         return 'Difícil';
+      case 'all':
+        return 'Todos';
       default:
         return difficulty;
     }
@@ -80,13 +82,10 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
             <TableHead className="font-semibold">Jogador</TableHead>
             <TableHead className="font-semibold">Pontuação</TableHead>
             <TableHead className="hidden md:table-cell font-semibold">
-              Acertos
-            </TableHead>
-            <TableHead className="hidden md:table-cell font-semibold">
               Streak
             </TableHead>
             <TableHead className="hidden md:table-cell font-semibold">
-              Tempo
+              Melhor Tempo
             </TableHead>
             <TableHead className="hidden md:table-cell font-semibold">
               Dificuldade
@@ -138,21 +137,6 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
               </TableCell>
               <TableCell className="font-bold text-indigo-600 dark:text-indigo-400">
                 {entry.score}
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                {entry.totalAttempts > 0 ? (
-                  <>
-                    <span className="text-emerald-600 dark:text-emerald-400">
-                      {entry.totalCorrect}
-                    </span>
-                    <span className="text-slate-400 dark:text-slate-600">
-                      /
-                    </span>
-                    <span>{entry.totalAttempts}</span>
-                  </>
-                ) : (
-                  <span className="text-slate-400">-</span>
-                )}
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 {entry.dailyStreak > 0 ? (

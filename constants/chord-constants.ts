@@ -84,9 +84,9 @@ export const DIFFICULTY_BORDERS = {
 };
 
 export const DIFFICULTY_ACTIVE_STATES = {
-  easy: 'data-[state=active]:bg-green-100 data-[state=active]:text-green-800',
-  medium: 'data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800',
-  hard: 'data-[state=active]:bg-rose-100 data-[state=active]:text-rose-800',
+  easy: '',
+  medium: '',
+  hard: '',
 };
 
 export const MAX_ATTEMPTS = 5;

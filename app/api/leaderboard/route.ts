@@ -1,6 +1,5 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { DailyChord } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface FormattedEntry {
@@ -11,8 +10,6 @@ interface FormattedEntry {
   timeTaken: number;
   difficulty: string;
   createdAt: string;
-  totalCorrect: number;
-  totalAttempts: number;
   dailyStreak: number;
   avgTime: number;
 }
@@ -76,99 +73,160 @@ export async function GET(request: NextRequest) {
     };
 
     let totalEntries = 0;
-    try {
-      totalEntries = await db.gameResult.count({
-        where: whereClause,
-      });
-    } catch (countError) {
-      console.error('Error counting entries:', countError);
-    }
-
-    const totalPages = Math.ceil(totalEntries / pageSize) || 1;
     let entries: any[] = [];
 
-    try {
-      entries = await db.gameResult.findMany({
-        where: whereClause,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-              Stats: true,
+    if (difficulty === 'all' || !difficulty) {
+      try {
+        const userScores = await db.gameResult.groupBy({
+          by: ['userId'],
+          _sum: {
+            score: true,
+          },
+          _min: {
+            timeTaken: true,
+          },
+          where: dateFilter,
+        });
+
+        totalEntries = userScores.length;
+        const totalPages = Math.ceil(totalEntries / pageSize) || 1;
+
+        const userIds = userScores.map(score => score.userId);
+        const paginatedUserIds = userIds.slice(skip, skip + pageSize);
+
+        const userDetails = await db.user.findMany({
+          where: {
+            id: {
+              in: paginatedUserIds,
             },
           },
-        },
-        orderBy: [{ score: 'desc' }, { timeTaken: 'asc' }],
-        skip,
-        take: pageSize,
-      });
-    } catch (queryError) {
-      console.error('Error querying entries:', queryError);
-    }
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            Stats: true,
+          },
+        });
 
-    const userIds = entries.map(entry => entry.user.id);
+        const userTotalScores = await Promise.all(
+          paginatedUserIds.map(async userId => {
+            const results = await db.gameResult.findMany({
+              where: {
+                userId,
+                ...dateFilter,
+              },
+              orderBy: [{ timeTaken: 'asc' }],
+            });
 
-    const dailyChords = await db.dailyChord.findMany({
-      where: {
-        userId: {
-          in: userIds,
-        },
-        difficulty: difficulty || undefined,
-      },
-      select: {
-        userId: true,
-        isCorrect: true,
-        difficulty: true,
-      },
-    });
+            const totalScore = results.reduce(
+              (sum, result) => sum + result.score,
+              0,
+            );
+            const bestTime = results.length > 0 ? results[0].timeTaken : 0;
 
-    const userDailyChords: Record<string, DailyChord[]> = {};
-    dailyChords.forEach(chord => {
-      if (!userDailyChords[chord.userId]) {
-        userDailyChords[chord.userId] = [];
+            return {
+              id: userId,
+              userId,
+              score: totalScore,
+              timeTaken: bestTime,
+              createdAt: results.length > 0 ? results[0].createdAt : new Date(),
+            };
+          }),
+        );
+
+        entries = userTotalScores
+          .map(result => {
+            const userDetail = userDetails.find(u => u.id === result.userId);
+            return {
+              ...result,
+              user: userDetail,
+            };
+          })
+          .sort((a, b) => {
+            if (b.score !== a.score) {
+              return b.score - a.score;
+            }
+            return a.timeTaken - b.timeTaken;
+          });
+
+        const formattedEntries: FormattedEntry[] = entries.map(entry => {
+          return {
+            id: entry.id,
+            username: entry.user?.name || 'Anonymous',
+            userImage: entry.user?.image || null,
+            score: entry.score,
+            timeTaken: entry.timeTaken,
+            difficulty: 'all',
+            createdAt: entry.createdAt.toISOString(),
+            dailyStreak: entry.user?.Stats?.dailyStreak || 0,
+            avgTime: entry.user?.Stats?.avgTime || 0,
+          };
+        });
+
+        return NextResponse.json({
+          success: true,
+          entries: formattedEntries,
+          currentPage: page,
+          totalPages,
+          totalEntries,
+        });
+      } catch (error) {
+        console.error('Error processing all difficulties:', error);
       }
-      userDailyChords[chord.userId].push({
-        difficulty: chord.difficulty,
-        createdAt: new Date(),
-        userId: chord.userId,
-        timeTaken: 0,
-        updatedAt: new Date(),
-        date: new Date(),
-        chordRoot: '',
-        chordType: '',
-        isCorrect: chord.isCorrect,
+    } else {
+      try {
+        totalEntries = await db.gameResult.count({
+          where: whereClause,
+        });
+      } catch (countError) {
+        console.error('Error counting entries:', countError);
+      }
+
+      const totalPages = Math.ceil(totalEntries / pageSize) || 1;
+
+      try {
+        entries = await db.gameResult.findMany({
+          where: whereClause,
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+                Stats: true,
+              },
+            },
+          },
+          orderBy: [{ score: 'desc' }, { timeTaken: 'asc' }],
+          skip,
+          take: pageSize,
+        });
+      } catch (queryError) {
+        console.error('Error querying entries:', queryError);
+      }
+
+      const formattedEntries: FormattedEntry[] = entries.map(entry => {
+        return {
+          id: entry.id,
+          username: entry.user.name || 'Anonymous',
+          userImage: entry.user.image || null,
+          score: entry.score,
+          timeTaken: entry.timeTaken,
+          difficulty: entry.difficulty,
+          createdAt: entry.createdAt.toISOString(),
+          dailyStreak: entry.user.Stats?.dailyStreak || 0,
+          avgTime: entry.user.Stats?.avgTime || 0,
+        };
       });
-    });
 
-    const formattedEntries: FormattedEntry[] = entries.map(entry => {
-      const userChords = userDailyChords[entry.user.id] || [];
-      const correctAnswers = userChords.filter(chord => chord.isCorrect).length;
-      const totalAttempts = userChords.length;
-
-      return {
-        id: entry.id,
-        username: entry.user.name || 'Anonymous',
-        userImage: entry.user.image || null,
-        score: entry.score,
-        timeTaken: entry.timeTaken,
-        difficulty: entry.difficulty,
-        createdAt: entry.createdAt.toISOString(),
-        totalCorrect: correctAnswers,
-        totalAttempts: totalAttempts,
-        dailyStreak: entry.user.Stats?.dailyStreak || 0,
-        avgTime: entry.user.Stats?.avgTime || 0,
-      };
-    });
-
-    return NextResponse.json({
-      success: true,
-      entries: formattedEntries,
-      currentPage: page,
-      totalPages,
-      totalEntries,
-    });
+      return NextResponse.json({
+        success: true,
+        entries: formattedEntries,
+        currentPage: page,
+        totalPages,
+        totalEntries,
+      });
+    }
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
     return NextResponse.json(

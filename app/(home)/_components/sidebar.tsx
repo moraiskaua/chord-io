@@ -59,15 +59,6 @@ export const HomeSidebar = async () => {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href={ROUTES.SETTINGS}>
-                  <span>Configurações</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
       <SidebarFooter>
