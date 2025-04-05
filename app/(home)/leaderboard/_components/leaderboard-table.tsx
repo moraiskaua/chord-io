@@ -62,6 +62,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
   };
 
   const getInitials = (name: string) => {
+    if (!name) return '??';
     return name
       .split(' ')
       .map(part => part[0])
@@ -85,7 +86,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
               Streak
             </TableHead>
             <TableHead className="hidden md:table-cell font-semibold">
-              Tempo Médio
+              Tempo
             </TableHead>
             <TableHead className="hidden md:table-cell font-semibold">
               Dificuldade
@@ -139,21 +140,33 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
                 {entry.score}
               </TableCell>
               <TableCell className="hidden md:table-cell">
-                <span className="text-emerald-600 dark:text-emerald-400">
-                  {entry.totalCorrect}
-                </span>
-                <span className="text-slate-400 dark:text-slate-600">/</span>
-                <span>{entry.totalAttempts}</span>
+                {entry.totalAttempts > 0 ? (
+                  <>
+                    <span className="text-emerald-600 dark:text-emerald-400">
+                      {entry.totalCorrect}
+                    </span>
+                    <span className="text-slate-400 dark:text-slate-600">
+                      /
+                    </span>
+                    <span>{entry.totalAttempts}</span>
+                  </>
+                ) : (
+                  <span className="text-slate-400">-</span>
+                )}
               </TableCell>
               <TableCell className="hidden md:table-cell">
-                <span className="font-medium">
-                  {entry.dailyStreak > 1
-                    ? `${entry.dailyStreak} dias`
-                    : `${entry.dailyStreak} dia`}
-                </span>
+                {entry.dailyStreak > 0 ? (
+                  <span className="font-medium">
+                    {entry.dailyStreak === 1
+                      ? '1 dia'
+                      : `${entry.dailyStreak} dias`}
+                  </span>
+                ) : (
+                  <span className="text-slate-400">-</span>
+                )}
               </TableCell>
               <TableCell className="hidden md:table-cell">
-                {formatTime(Math.round(entry.avgTime))}
+                {formatTime(Math.round(entry.timeTaken))}
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 <Badge
