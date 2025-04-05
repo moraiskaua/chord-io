@@ -20,8 +20,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Session       Session[]
-  Authenticator Authenticator[]
+  Session         Session[]
+  Authenticator   Authenticator[]
+  DailyChord      DailyChord[]
+  FreeModeAttempt FreeModeAttempt[]
+  Stats           UserStats?
 
   @@map("users")
 }
@@ -84,4 +87,52 @@ model Authenticator {
 
   @@id([userId, credentialID])
   @@map("authenticators")
+}
+
+model DailyChord {
+  userId    String   @db.Uuid
+  date      DateTime @db.Timestamp
+  chordRoot String
+  chordType String
+  isCorrect Boolean
+  timeTaken Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, date])
+  @@map("daily_chords")
+}
+
+model FreeModeAttempt {
+  id         String  @id @default(uuid()) @db.Uuid
+  userId     String  @db.Uuid
+  chordRoot  String
+  chordType  String
+  userAnswer String
+  isCorrect  Boolean
+  timeTaken  Int
+  complexity Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("free_mode_attempts")
+}
+
+model UserStats {
+  userId        String   @id @db.Uuid
+  totalCorrect  Int      @default(0)
+  totalAttempts Int      @default(0)
+  dailyStreak   Int      @default(0)
+  avgTime       Float?   @default(0)
+  bestDailyTime Int?
+  lastAttempt   DateTime @db.Timestamp
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_stats")
 }
