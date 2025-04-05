@@ -9,10 +9,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { SignOutButton } from './sign-out-button';
 import { ROUTES } from '@/constants/routes';
 import { auth } from '@/lib/auth';
 import Link from 'next/link';
+import { SignOutButton } from './sign-out-button';
 
 export const HomeSidebar = async () => {
   const session = await auth();
@@ -53,8 +53,8 @@ export const HomeSidebar = async () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link href={ROUTES.DASHBOARD}>
-                  <span>Dashboard</span>
+                <Link href={ROUTES.LEADERBOARD}>
+                  <span>Ranking</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

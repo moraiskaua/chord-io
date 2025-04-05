@@ -1,21 +1,22 @@
+import { Suspense } from 'react';
+import DailyChordGame from './_components/daily-chord-game';
+
 export default function Home() {
   return (
-    <div className="h-screen">
-      <div className="container mx-auto mt-10">
-        <h1 className="text-center text-3xl font-bold">Chord.io</h1>
-        <h3 className="text-center text-2xl font-bold">Em contrução...🚧</h3>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
+      <div className="max-w-4xl mx-auto space-y-8 py-8">
+        <header className="text-center space-y-4">
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
+            Chord-io
+          </h1>
+          <p className="text-muted-foreground">
+            Desafie seus ouvidos e reconheça acordes musicais
+          </p>
+        </header>
 
-        <p className="text-center mt-5">
-          por{' '}
-          <a
-            href="https://github.com/moraiskaua"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            Kauã Morais
-          </a>
-        </p>
+        <Suspense fallback={<div>Carregando...</div>}>
+          <DailyChordGame />
+        </Suspense>
       </div>
     </div>
   );

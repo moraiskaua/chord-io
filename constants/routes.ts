@@ -4,6 +4,6 @@ export const ROUTES = {
   FREE_MODE: '/free-mode',
   PROFILE: '/profile',
   SETTINGS: '/settings',
-  DASHBOARD: '/dashboard',
+  LEADERBOARD: '/leaderboard',
   NOT_FOUND: '/404',
 };
