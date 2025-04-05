@@ -25,6 +25,7 @@ model User {
   DailyChord      DailyChord[]
   FreeModeAttempt FreeModeAttempt[]
   Stats           UserStats?
+  GameStates      GameState[]
 
   @@map("users")
 }
@@ -90,18 +91,19 @@ model Authenticator {
 }
 
 model DailyChord {
-  userId    String   @db.Uuid
-  date      DateTime @db.Timestamp
-  chordRoot String
-  chordType String
-  isCorrect Boolean
-  timeTaken Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId     String   @db.Uuid
+  date       DateTime @db.Timestamp
+  chordRoot  String
+  chordType  String
+  isCorrect  Boolean
+  timeTaken  Int
+  difficulty String   @default("easy")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([userId, date])
+  @@id([userId, date, difficulty])
   @@map("daily_chords")
 }
 
@@ -135,4 +137,20 @@ model UserStats {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_stats")
+}
+
+model GameState {
+  userId     String   @db.Uuid
+  difficulty String
+  attempts   Int      @default(0)
+  isPlaying  Boolean  @default(false)
+  gameOver   Boolean  @default(false)
+  score      Int      @default(0)
+  time       Int      @default(0)
+  date       DateTime @db.Timestamp
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, difficulty, date])
+  @@map("game_states")
 }
