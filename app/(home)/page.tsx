@@ -13,7 +13,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="underline"
           >
-            Kauã Morais.
+            Kauã Morais
           </a>
         </p>
       </div>

@@ -1,8 +1,8 @@
-import { signIn } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { FaDiscord } from 'react-icons/fa';
-import { ButtonHTMLAttributes, ReactNode } from 'react';
 import { ROUTES } from '@/constants/routes';
+import { signIn } from '@/lib/auth';
+import { ButtonHTMLAttributes, ReactNode } from 'react';
+import { FaDiscord } from 'react-icons/fa';
 
 interface SignInWithDiscordProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {

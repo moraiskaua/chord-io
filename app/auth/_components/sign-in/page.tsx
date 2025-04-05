@@ -8,7 +8,7 @@ const SignInPage = () => {
       <h1 className="text-3xl font-bold">Entre para salvar seu progresso.</h1>
       <SignInForm />
       <SignInWithGoogle>Entrar com Google</SignInWithGoogle>
-      <SignInWithDiscord disabled className="hover:cursor-not-allowed">
+      <SignInWithDiscord disabled className="hover:cursor-not-allowed w-full">
         Entrar com Discord
       </SignInWithDiscord>
     </div>
