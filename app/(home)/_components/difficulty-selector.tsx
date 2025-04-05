@@ -10,7 +10,7 @@ import {
   DIFFICULTY_LABELS,
 } from '@/constants/chord-constants';
 import { Difficulty } from '@/entities/chord-types';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -20,6 +20,7 @@ interface DifficultySelectorProps {
   isPlaying: boolean;
   loading: boolean;
   alreadyPlayed: Record<Difficulty, boolean>;
+  alreadyCorrect: Record<Difficulty, boolean>;
   isPending: boolean;
   startGame: () => Promise<void>;
 }
@@ -30,6 +31,7 @@ export function DifficultySelector({
   isPlaying,
   loading,
   alreadyPlayed,
+  alreadyCorrect,
   isPending,
   startGame,
 }: DifficultySelectorProps) {
@@ -75,11 +77,32 @@ export function DifficultySelector({
               </p>
 
               {alreadyPlayed[mode] && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert
+                  variant={alreadyCorrect[mode] ? 'default' : 'destructive'}
+                  className={`mb-4 border-2 ${
+                    alreadyCorrect[mode]
+                      ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+                      : 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                  }`}
+                >
+                  {alreadyCorrect[mode] ? (
+                    <CheckCircle2
+                      className="size-4 dark:text-green-400"
+                      color="#22c55e "
+                    />
+                  ) : (
+                    <AlertCircle className="size-4 text-red-500 dark:text-red-400" />
+                  )}
+                  <AlertDescription
+                    className={
+                      alreadyCorrect[mode]
+                        ? 'text-green-700 dark:text-green-300'
+                        : 'text-red-700 dark:text-red-300'
+                    }
+                  >
                     Você já jogou o desafio diário no modo{' '}
-                    {DIFFICULTY_LABELS[mode]} hoje.
+                    {DIFFICULTY_LABELS[mode]} hoje
+                    {alreadyCorrect[mode] ? ' e acertou!' : ' mas não acertou.'}
                   </AlertDescription>
                 </Alert>
               )}
@@ -88,6 +111,15 @@ export function DifficultySelector({
                 <Button
                   onClick={handleStartGame}
                   className={`w-full ${DIFFICULTY_COLORS[mode]}`}
+                  variant="default"
+                  style={{
+                    background:
+                      mode === 'easy'
+                        ? 'linear-gradient(to right, #4ade80, #22c55e)'
+                        : mode === 'medium'
+                        ? 'linear-gradient(to right, #f59e0b, #d97706)'
+                        : 'linear-gradient(to right, #ef4444, #dc2626)',
+                  }}
                   disabled={
                     loading || localLoading || alreadyPlayed[mode] || isPending
                   }
@@ -95,7 +127,9 @@ export function DifficultySelector({
                   {loading || localLoading
                     ? 'Carregando...'
                     : alreadyPlayed[mode]
-                    ? 'Já jogado hoje'
+                    ? alreadyCorrect[mode]
+                      ? 'Acertou hoje!'
+                      : 'Já jogado hoje'
                     : 'Iniciar Desafio Diário'}
                 </Button>
               )}

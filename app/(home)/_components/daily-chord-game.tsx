@@ -14,7 +14,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { DifficultySelector } from './difficulty-selector';
@@ -51,12 +51,49 @@ export default function DailyChordGame() {
     stopTimer,
   } = useChordGame();
 
-  const { isArpeggio, setIsArpeggio, playChordSound } = useChordSound();
+  const {
+    isArpeggio,
+    instrument,
+    setIsArpeggio,
+    playChordSound,
+    toggleInstrument,
+  } = useChordSound();
   const [isPending, startTransition] = useTransition();
+  const [alreadyCorrect, setAlreadyCorrect] = useState<Record<string, boolean>>(
+    {
+      easy: false,
+      medium: false,
+      hard: false,
+    },
+  );
 
   useEffect(() => {
     loadGameState();
+    loadPreviousResults();
   }, []);
+
+  const loadPreviousResults = async () => {
+    try {
+      const { data } = await axios.get('/api/user/previous-results');
+      if (data.success && data.results) {
+        const correctMap: Record<string, boolean> = {
+          easy: false,
+          medium: false,
+          hard: false,
+        };
+
+        data.results.forEach((result: any) => {
+          if (result.difficulty && result.isCorrect !== undefined) {
+            correctMap[result.difficulty] = result.isCorrect;
+          }
+        });
+
+        setAlreadyCorrect(correctMap);
+      }
+    } catch (error) {
+      console.error('Error loading previous results:', error);
+    }
+  };
 
   useEffect(() => {
     if (alreadyPlayed[currentMode] && isPlaying) {
@@ -98,6 +135,38 @@ export default function DailyChordGame() {
       difficulty: currentMode,
     },
   });
+
+  const calculateSimilarity = (
+    answer: string,
+    correctAnswer: string,
+  ): number => {
+    if (!answer || !correctAnswer) return 0;
+
+    const a = answer.toLowerCase();
+    const c = correctAnswer.toLowerCase();
+
+    if (a === c) return 100;
+
+    if (a.charAt(0) === c.charAt(0)) {
+      if (
+        (a.startsWith(c.substring(0, 2)) && c.charAt(1) === '#') ||
+        (a.startsWith(c.substring(0, 2)) && c.charAt(1) === 'b')
+      ) {
+        return 80;
+      }
+      return 60;
+    }
+
+    if (
+      (a.includes('m') && c.includes('m')) ||
+      (a.includes('7') && c.includes('7')) ||
+      (a.includes('dim') && c.includes('dim'))
+    ) {
+      return 40;
+    }
+
+    return 20;
+  };
 
   const checkAnswer = async () => {
     if (!userAnswer) return;
@@ -200,6 +269,11 @@ export default function DailyChordGame() {
           ...prev,
           [currentMode]: true,
         }));
+
+        setAlreadyCorrect(prev => ({
+          ...prev,
+          [currentMode]: isCorrect,
+        }));
       });
     } catch (error: any) {
       console.error('Erro ao salvar resultado:', error);
@@ -213,15 +287,24 @@ export default function DailyChordGame() {
 
   return (
     <>
-      <div className="flex justify-center items-center gap-4 mb-4">
-        <Badge variant="outline" className="px-4 py-1 text-sm">
+      <div className="flex justify-center items-center gap-4 mb-6">
+        <Badge
+          variant="outline"
+          className="px-4 py-2 text-base shadow-sm border-2"
+        >
           🏆 {score}
         </Badge>
-        <Badge variant="outline" className="px-4 py-1 text-sm">
+        <Badge
+          variant="outline"
+          className="px-4 py-2 text-base shadow-sm border-2"
+        >
           ⏱️ {formatTime(time)}
         </Badge>
         {isPlaying && (
-          <Badge variant="outline" className="px-4 py-1 text-sm">
+          <Badge
+            variant="outline"
+            className="px-4 py-2 text-base shadow-sm border-2"
+          >
             🎯 {attempts}/{MAX_ATTEMPTS}
           </Badge>
         )}
@@ -233,6 +316,7 @@ export default function DailyChordGame() {
         isPlaying={isPlaying}
         loading={loading}
         alreadyPlayed={alreadyPlayed}
+        alreadyCorrect={alreadyCorrect}
         isPending={isPending}
         startGame={startGame}
       />
@@ -244,18 +328,18 @@ export default function DailyChordGame() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="mt-6"
+            className="mt-8"
           >
-            <Card className="border shadow-md">
+            <Card className="border-2 shadow-lg rounded-xl overflow-hidden">
               <CardContent className="pt-6 flex flex-col items-center">
-                <div className="w-full mb-4">
+                <div className="w-full mb-6">
                   <Progress
                     value={(attempts / MAX_ATTEMPTS) * 100}
-                    className="h-2"
+                    className="h-3 rounded-full"
                   />
                 </div>
 
-                <div className="text-4xl font-mono font-bold mb-8">
+                <div className="text-5xl font-mono font-bold mb-8 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg shadow-inner">
                   {userAnswer || '?'}
                 </div>
 
@@ -268,6 +352,8 @@ export default function DailyChordGame() {
                   playChordSound={playChordSound}
                   checkAnswer={checkAnswer}
                   setUserAnswer={setUserAnswer}
+                  instrument={instrument}
+                  toggleInstrument={toggleInstrument}
                 />
 
                 {gameOver && (

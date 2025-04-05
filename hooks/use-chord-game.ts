@@ -1,3 +1,4 @@
+import { MAX_ATTEMPTS } from '@/constants/chord-constants';
 import { Difficulty } from '@/entities/chord-types';
 import { GameStateFormData, gameStateSchema } from '@/schemas/game-schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -5,8 +6,6 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-
-export const MAX_ATTEMPTS = 5;
 
 type GameState = {
   difficulty: Difficulty;

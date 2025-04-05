@@ -7,9 +7,28 @@ import { NextRequest, NextResponse } from 'next/server';
 const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 const chordTypes = {
-  easy: ['', 'm'],
-  medium: ['', 'm', '7', 'm7', 'maj7'],
-  hard: ['dim', 'm7b5', 'aug', '9', 'maj9', 'm9'],
+  easy: ['', 'm', '7', 'maj7'],
+  medium: ['m7', '6', 'm6', 'sus4', 'sus2', 'add9', '9'],
+  hard: [
+    'dim',
+    'm7b5',
+    'aug',
+    'maj9',
+    'm9',
+    '13',
+    'maj13',
+    '7b9',
+    '7#9',
+    '7#11',
+    'm11',
+  ],
+};
+
+export const difficultyDescriptions = {
+  easy: 'Acordes básicos que todo músico iniciante deve conhecer. Inclui acordes maiores, menores e sétimas simples.',
+  medium:
+    'Acordes intermediários com extensões como sextas, suspensões e nonas. Um desafio para músicos com alguma experiência.',
+  hard: 'Acordes avançados com extensões complexas, alterações e tensões. Desafio para músicos experientes e profissionais.',
 };
 
 export async function POST(request: NextRequest) {
@@ -36,10 +55,15 @@ export async function POST(request: NextRequest) {
     const { difficulty } = result.data;
 
     const today = new Date();
-    const seed =
+    const baseSeed =
       today.getFullYear() * 10000 +
       (today.getMonth() + 1) * 100 +
       today.getDate();
+
+    const difficultyOffset =
+      difficulty === 'easy' ? 0 : difficulty === 'medium' ? 3000 : 6000;
+
+    const seed = baseSeed + difficultyOffset;
 
     const seededRandom = (seed: number) => {
       const x = Math.sin(seed) * 10000;
@@ -55,14 +79,21 @@ export async function POST(request: NextRequest) {
     const type = chordTypes[difficulty][typeIndex];
     const fullChord = note + type;
 
-    if (!note || !type) {
+    if (!note || type === undefined) {
       return NextResponse.json(
         { success: false, error: 'Falha ao gerar dados do acorde' },
         { status: 500 },
       );
     }
 
-    const chordData = { note, type, fullChord };
+    const chordData = {
+      note,
+      type,
+      fullChord,
+      difficulty,
+      difficultyDescription: difficultyDescriptions[difficulty],
+    };
+
     const chordId = encrypt(JSON.stringify(chordData));
 
     (await cookies()).set('chord_token', chordId, {
@@ -72,7 +103,12 @@ export async function POST(request: NextRequest) {
       maxAge: 86400, // 24 hours
     });
 
-    return NextResponse.json({ success: true, id: chordId });
+    return NextResponse.json({
+      success: true,
+      id: chordId,
+      difficulty,
+      difficultyDescription: difficultyDescriptions[difficulty],
+    });
   } catch (error) {
     console.error('Erro ao iniciar jogo:', error);
     return NextResponse.json(

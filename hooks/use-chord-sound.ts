@@ -13,6 +13,7 @@ export function useChordSound() {
   const [instrument, setInstrument] = useState<Instrument>('piano');
   const [octave, setOctave] = useState<Octave>('3');
   const audioRefs = useRef<HTMLAudioElement[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getChordNotesFromServer = async (): Promise<string[]> => {
     try {
@@ -46,18 +47,26 @@ export function useChordSound() {
 
   const playChordSound = async (forceArpeggio?: boolean) => {
     try {
+      setIsLoading(true);
+
       audioRefs.current.forEach(audio => {
         audio.pause();
         audio.currentTime = 0;
       });
 
       const chordNotes = await getChordNotesFromServer();
-      if (chordNotes.length === 0) return;
+      if (chordNotes.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      const instrumentPath =
+        instrument === 'guitar-acoustic' ? 'guitar-acoustic' : 'piano';
 
       const audioElements = chordNotes.map(note => {
         const noteFile = note.replace('#', 's');
         const audio = new Audio(
-          `/sounds/${instrument}/${noteFile}${octave}.mp3`,
+          `/sounds/${instrumentPath}/${noteFile}${octave}.mp3`,
         );
         audio.volume = 0.7;
         return audio;
@@ -68,38 +77,69 @@ export function useChordSound() {
       const playAsArpeggio =
         forceArpeggio !== undefined ? forceArpeggio : isArpeggio;
 
+      const playPromises: Promise<void>[] = [];
+
       if (playAsArpeggio) {
+        const arpeggioSpeed = instrument === 'guitar-acoustic' ? 180 : 220;
         let delay = 0;
+
         audioElements.forEach(audio => {
-          setTimeout(() => {
-            audio.play().catch(err => {
-              console.error('Erro ao tocar áudio:', err);
-              toast.error('Algo deu errado.');
-            });
-          }, delay);
-          delay += 200;
+          const playPromise = new Promise<void>(resolve => {
+            setTimeout(() => {
+              audio
+                .play()
+                .then(() => {
+                  audio.addEventListener('ended', () => resolve());
+                })
+                .catch(err => {
+                  console.error('Erro ao tocar áudio:', err);
+                  toast.error('Algo deu errado ao tocar o som.');
+                  resolve();
+                });
+            }, delay);
+          });
+
+          playPromises.push(playPromise);
+          delay += arpeggioSpeed;
         });
+
+        setTimeout(() => {
+          setIsLoading(false);
+        }, delay + 500);
       } else {
         audioElements.forEach(audio => {
-          audio.play().catch(err => {
-            console.error('Erro ao tocar áudio:', err.message);
-            toast.error('Algo deu errado.');
+          const playPromise = audio.play().catch(err => {
+            console.error('Erro ao tocar áudio:', err);
+            toast.error('Algo deu errado ao tocar o som.');
           });
+
+          playPromises.push(playPromise as Promise<void>);
         });
+
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1500);
       }
     } catch (error) {
       console.error('Erro ao tocar som:', error);
       toast.error('Erro ao tocar som.');
+      setIsLoading(false);
     }
+  };
+
+  const toggleInstrument = () => {
+    setInstrument(prev => (prev === 'piano' ? 'guitar-acoustic' : 'piano'));
   };
 
   return {
     isArpeggio,
     instrument,
     octave,
+    isLoading,
     setIsArpeggio,
     setInstrument,
     setOctave,
     playChordSound,
+    toggleInstrument,
   };
 }
