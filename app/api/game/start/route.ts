@@ -1,3 +1,4 @@
+import { DIFFICULTY_DESCRIPTIONS } from '@/constants/chord-constants';
 import { auth } from '@/lib/auth';
 import { encrypt } from '@/lib/encryption';
 import { difficultySchema } from '@/schemas/game-schemas';
@@ -22,13 +23,6 @@ const chordTypes = {
     '7#11',
     'm11',
   ],
-};
-
-export const difficultyDescriptions = {
-  easy: 'Acordes básicos que todo músico iniciante deve conhecer. Inclui acordes maiores, menores e sétimas simples.',
-  medium:
-    'Acordes intermediários com extensões como sextas, suspensões e nonas. Um desafio para músicos com alguma experiência.',
-  hard: 'Acordes avançados com extensões complexas, alterações e tensões. Desafio para músicos experientes e profissionais.',
 };
 
 export async function POST(request: NextRequest) {
@@ -91,7 +85,7 @@ export async function POST(request: NextRequest) {
       type,
       fullChord,
       difficulty,
-      difficultyDescription: difficultyDescriptions[difficulty],
+      difficultyDescription: DIFFICULTY_DESCRIPTIONS[difficulty],
     };
 
     const chordId = encrypt(JSON.stringify(chordData));
@@ -107,7 +101,7 @@ export async function POST(request: NextRequest) {
       success: true,
       id: chordId,
       difficulty,
-      difficultyDescription: difficultyDescriptions[difficulty],
+      difficultyDescription: DIFFICULTY_DESCRIPTIONS[difficulty],
     });
   } catch (error) {
     console.error('Erro ao iniciar jogo:', error);

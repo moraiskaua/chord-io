@@ -67,11 +67,6 @@ export default function DailyChordGame() {
     },
   );
 
-  useEffect(() => {
-    loadGameState();
-    loadPreviousResults();
-  }, []);
-
   const loadPreviousResults = async () => {
     try {
       const { data } = await axios.get('/api/user/previous-results');
@@ -96,12 +91,24 @@ export default function DailyChordGame() {
   };
 
   useEffect(() => {
+    loadGameState();
+    loadPreviousResults();
+  }, [loadGameState, loadPreviousResults]);
+
+  useEffect(() => {
     if (alreadyPlayed[currentMode] && isPlaying) {
       setIsPlaying(false);
       setGameOver(false);
       stopTimer();
     }
-  }, [alreadyPlayed, currentMode]);
+  }, [
+    alreadyPlayed,
+    currentMode,
+    isPlaying,
+    setIsPlaying,
+    setGameOver,
+    stopTimer,
+  ]);
 
   useEffect(() => {
     if (isPlaying && !gameOver) {
@@ -118,7 +125,7 @@ export default function DailyChordGame() {
 
       return () => clearInterval(saveInterval);
     }
-  }, [isPlaying, gameOver, attempts, score, time, currentMode]);
+  }, [isPlaying, gameOver, attempts, score, time, currentMode, saveGameState]);
 
   const answerForm = useForm<AnswerFormData>({
     resolver: zodResolver(answerSchema),

@@ -65,9 +65,10 @@ export const DIFFICULTY_LABELS = {
 };
 
 export const DIFFICULTY_DESCRIPTIONS = {
-  easy: 'Reconheça acordes maiores e menores básicos',
-  medium: 'Reconheça acordes com 7ª e 9ª',
-  hard: 'Reconheça acordes diminutos e meio-diminutos',
+  easy: 'Acordes básicos que todo músico iniciante deve conhecer. Inclui acordes maiores, menores e sétimas simples.',
+  medium:
+    'Acordes intermediários com extensões como sextas, suspensões e nonas. Um desafio para músicos com alguma experiência.',
+  hard: 'Acordes avançados com extensões complexas, alterações e tensões. Desafio para músicos experientes e profissionais.',
 };
 
 export const DIFFICULTY_COLORS = {
