@@ -19,29 +19,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import { LeaderboardTable } from './leaderboard-table';
+import { LeaderboardEntry, LeaderboardTable } from './leaderboard-table';
 import { Pagination } from './pagination';
 
 type Difficulty = 'easy' | 'medium' | 'hard' | 'all';
 type TimeFrame = 'daily' | 'weekly' | 'yearly' | 'all';
 
-interface LeaderboardEntry {
-  id: string;
-  username: string;
-  userImage: string | null;
-  score: number;
-  timeTaken: number;
-  difficulty: string;
-  createdAt: string;
-  totalCorrect: number;
-  totalAttempts: number;
-  dailyStreak: number;
-  avgTime: number;
-}
-
 export default function LeaderboardContainer() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [difficulty, setDifficulty] = useState<Difficulty>('all');
@@ -50,6 +37,8 @@ export default function LeaderboardContainer() {
   const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+
       const { data } = await axios.get('/api/leaderboard', {
         params: {
           page: currentPage,
@@ -61,9 +50,12 @@ export default function LeaderboardContainer() {
       if (data.success) {
         setEntries(data.entries);
         setTotalPages(data.totalPages);
+      } else {
+        setError(data.error || 'Erro ao carregar o leaderboard');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching leaderboard:', error);
+      setError(error.message || 'Erro ao carregar o leaderboard');
     } finally {
       setLoading(false);
     }
@@ -153,6 +145,17 @@ export default function LeaderboardContainer() {
             <Skeleton className="h-12 w-full bg-slate-200 dark:bg-slate-800" />
             <Skeleton className="h-12 w-full bg-slate-200 dark:bg-slate-800" />
             <Skeleton className="h-12 w-full bg-slate-200 dark:bg-slate-800" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+            <p className="text-rose-600 dark:text-rose-400 mb-4">{error}</p>
+            <Button
+              variant="outline"
+              onClick={fetchLeaderboard}
+              className="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              Tentar novamente
+            </Button>
           </div>
         ) : entries.length > 0 ? (
           <>
