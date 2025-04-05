@@ -73,7 +73,7 @@ export function GameControls({
             }}
             disabled={isDisabled}
           >
-            <Volume2 className="mr-2 h-5 w-5 text-blue-500" /> Ouvir Acorde
+            <Volume2 className="mr-2 size-5 text-blue-500" /> Ouvir Acorde
           </Button>
           <Button
             variant="outline"
@@ -85,7 +85,7 @@ export function GameControls({
             }}
             disabled={isDisabled}
           >
-            <Music className="mr-2 h-5 w-5 text-purple-500" /> Ouvir Arpejo
+            <Music className="mr-2 size-5 text-purple-500" /> Ouvir Arpejo
           </Button>
         </div>
         <Button
@@ -95,7 +95,7 @@ export function GameControls({
           onClick={checkAnswer}
           disabled={!userAnswer || isDisabled}
         >
-          <Send className="mr-2 h-5 w-5" />
+          <Send className="mr-2 size-5" />
           {submitting ? 'Verificando...' : 'Confirmar Resposta'}
         </Button>
       </div>

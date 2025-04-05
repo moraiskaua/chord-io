@@ -99,6 +99,27 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      const gameState = await db.gameState.findUnique({
+        where: {
+          userId_difficulty_date: {
+            userId,
+            difficulty,
+            date: today,
+          },
+        },
+      });
+
+      if (gameState) {
+        await db.gameResult.create({
+          data: {
+            userId,
+            score: gameState.score,
+            timeTaken: gameState.time,
+            difficulty,
+          },
+        });
+      }
+
       const userStats = await db.userStats.findUnique({
         where: { userId },
       });
