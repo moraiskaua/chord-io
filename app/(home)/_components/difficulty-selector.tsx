@@ -1,13 +1,18 @@
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DIFFICULTY_ACTIVE_STATES,
   DIFFICULTY_BORDERS,
+  DIFFICULTY_COLORS,
   DIFFICULTY_DESCRIPTIONS,
   DIFFICULTY_LABELS,
 } from '@/constants/chord-constants';
 import { Difficulty } from '@/entities/chord-types';
+import { AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 interface DifficultySelectorProps {
   currentMode: Difficulty;
@@ -28,6 +33,20 @@ export function DifficultySelector({
   isPending,
   startGame,
 }: DifficultySelectorProps) {
+  const [localLoading, setLocalLoading] = useState(false);
+
+  const handleStartGame = async () => {
+    try {
+      setLocalLoading(true);
+      await startGame();
+    } catch (error) {
+      console.error('Error starting game:', error);
+      toast.error('Falha ao iniciar o jogo. Por favor, tente novamente.');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
   return (
     <Tabs
       defaultValue={currentMode}
@@ -54,13 +73,26 @@ export function DifficultySelector({
               <p className="text-center text-sm text-muted-foreground mb-4">
                 {DIFFICULTY_DESCRIPTIONS[mode]}
               </p>
+
+              {alreadyPlayed[mode] && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Você já jogou o desafio diário no modo{' '}
+                    {DIFFICULTY_LABELS[mode]} hoje.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {!isPlaying && (
                 <Button
-                  onClick={startGame}
-                  className={`w-full`}
-                  disabled={loading || alreadyPlayed[mode] || isPending}
+                  onClick={handleStartGame}
+                  className={`w-full ${DIFFICULTY_COLORS[mode]}`}
+                  disabled={
+                    loading || localLoading || alreadyPlayed[mode] || isPending
+                  }
                 >
-                  {loading
+                  {loading || localLoading
                     ? 'Carregando...'
                     : alreadyPlayed[mode]
                     ? 'Já jogado hoje'

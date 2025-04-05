@@ -5,9 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    console.log(session);
 
-    if (!session?.user?.email) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 

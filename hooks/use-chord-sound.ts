@@ -1,10 +1,10 @@
-import { getChordNotes } from '@/app/(home)/_actions/chord-actions';
 import {
   CHORD_DEFINITIONS,
   INDEX_TO_NOTE,
   NOTE_TO_INDEX,
 } from '@/constants/chord-constants';
 import { Instrument, Octave } from '@/entities/chord-types';
+import axios from 'axios';
 import { useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -16,13 +16,13 @@ export function useChordSound() {
 
   const getChordNotesFromServer = async (): Promise<string[]> => {
     try {
-      const result = await getChordNotes();
+      const { data } = await axios.get('/api/chord/notes');
 
-      if (!result.success) {
-        throw new Error(result.error);
+      if (!data.success) {
+        throw new Error(data.error);
       }
 
-      const { note, type } = result;
+      const { note, type } = data;
 
       if (!CHORD_DEFINITIONS[type as keyof typeof CHORD_DEFINITIONS]) {
         return [note];
@@ -44,8 +44,13 @@ export function useChordSound() {
     }
   };
 
-  const playChordSound = async () => {
+  const playChordSound = async (forceArpeggio?: boolean) => {
     try {
+      audioRefs.current.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+      });
+
       const chordNotes = await getChordNotesFromServer();
       if (chordNotes.length === 0) return;
 
@@ -60,13 +65,16 @@ export function useChordSound() {
 
       audioRefs.current = audioElements;
 
-      if (isArpeggio) {
+      const playAsArpeggio =
+        forceArpeggio !== undefined ? forceArpeggio : isArpeggio;
+
+      if (playAsArpeggio) {
         let delay = 0;
         audioElements.forEach(audio => {
           setTimeout(() => {
             audio.play().catch(err => {
               console.error('Erro ao tocar áudio:', err);
-              toast.error(`Erro ao tocar áudio: ${err.message}`);
+              toast.error('Algo deu errado.');
             });
           }, delay);
           delay += 200;
@@ -74,25 +82,23 @@ export function useChordSound() {
       } else {
         audioElements.forEach(audio => {
           audio.play().catch(err => {
-            console.error('Erro ao tocar áudio:', err);
-            toast.error(`Erro ao tocar áudio: ${err.message}`);
+            console.error('Erro ao tocar áudio:', err.message);
+            toast.error('Algo deu errado.');
           });
         });
       }
-
-      toast.success(isArpeggio ? 'Tocando arpejo...' : 'Tocando acorde...');
     } catch (error) {
       console.error('Erro ao tocar som:', error);
-      toast.error('Erro ao tocar som');
+      toast.error('Erro ao tocar som.');
     }
   };
 
   return {
     isArpeggio,
-    setIsArpeggio,
     instrument,
-    setInstrument,
     octave,
+    setIsArpeggio,
+    setInstrument,
     setOctave,
     playChordSound,
   };

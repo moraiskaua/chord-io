@@ -7,7 +7,7 @@ interface GameControlsProps {
   submitting: boolean;
   isArpeggio: boolean;
   setIsArpeggio: (value: boolean) => void;
-  playChordSound: () => void;
+  playChordSound: (forceArpeggio?: boolean) => void;
   checkAnswer: () => Promise<void>;
   setUserAnswer: (value: string) => void;
 }
@@ -33,7 +33,7 @@ export function GameControls({
             className="h-16"
             onClick={() => {
               setIsArpeggio(false);
-              playChordSound();
+              playChordSound(false);
             }}
             disabled={gameOver || submitting || isPending}
           >
@@ -45,7 +45,7 @@ export function GameControls({
             className="h-16"
             onClick={() => {
               setIsArpeggio(true);
-              playChordSound();
+              playChordSound(true);
             }}
             disabled={gameOver || submitting || isPending}
           >

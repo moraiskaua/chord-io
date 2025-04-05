@@ -5,10 +5,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useChordGame } from '@/hooks/use-chord-game';
 import { useChordSound } from '@/hooks/use-chord-sound';
+import {
+  AnswerFormData,
+  answerSchema,
+  GameResultFormData,
+  gameResultSchema,
+} from '@/schemas/game-schemas';
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useTransition } from 'react';
+import { useEffect, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { saveGameResult, verifyChordAnswer } from '../_actions/chord-actions';
 import { DifficultySelector } from './difficulty-selector';
 import { GameControls } from './game-controls';
 import { GameResult } from './game-result';
@@ -38,11 +46,58 @@ export default function DailyChordGame() {
     startGame,
     formatTime,
     setAlreadyPlayed,
+    loadGameState,
+    saveGameState,
+    stopTimer,
   } = useChordGame();
 
   const { isArpeggio, setIsArpeggio, playChordSound } = useChordSound();
-
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    loadGameState();
+  }, []);
+
+  useEffect(() => {
+    if (alreadyPlayed[currentMode] && isPlaying) {
+      setIsPlaying(false);
+      setGameOver(false);
+      stopTimer();
+    }
+  }, [alreadyPlayed, currentMode]);
+
+  useEffect(() => {
+    if (isPlaying && !gameOver) {
+      const saveInterval = setInterval(() => {
+        saveGameState({
+          difficulty: currentMode,
+          attempts,
+          isPlaying,
+          gameOver,
+          score,
+          time,
+        });
+      }, 15000);
+
+      return () => clearInterval(saveInterval);
+    }
+  }, [isPlaying, gameOver, attempts, score, time, currentMode]);
+
+  const answerForm = useForm<AnswerFormData>({
+    resolver: zodResolver(answerSchema),
+    defaultValues: {
+      answer: '',
+    },
+  });
+
+  const resultForm = useForm<GameResultFormData>({
+    resolver: zodResolver(gameResultSchema),
+    defaultValues: {
+      isCorrect: false,
+      timeTaken: 0,
+      difficulty: currentMode,
+    },
+  });
 
   const checkAnswer = async () => {
     if (!userAnswer) return;
@@ -50,10 +105,9 @@ export default function DailyChordGame() {
     try {
       setSubmitting(true);
 
-      const formData = new FormData();
-      formData.append('answer', userAnswer);
-
-      const result = await verifyChordAnswer(formData);
+      const { data: result } = await axios.post('/api/game/verify', {
+        answer: userAnswer,
+      });
 
       if (!result.success) {
         throw new Error(result.error || 'Erro ao verificar resposta');
@@ -64,37 +118,79 @@ export default function DailyChordGame() {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
 
+      await saveGameState({
+        difficulty: currentMode,
+        attempts: newAttempts,
+        isPlaying,
+        gameOver,
+        score,
+        time,
+      });
+
       if (result.isCorrect) {
-        setScore(prev => prev + Math.max(500 - time * 2, 100));
+        const newScore = score + Math.max(500 - time * 2, 100);
+        setScore(newScore);
         toast.success(`Correto! O acorde era ${result.chordData.fullChord}`);
         setGameOver(true);
+
+        resultForm.setValue('isCorrect', true);
+        resultForm.setValue('timeTaken', time);
+        resultForm.setValue('difficulty', currentMode);
+
+        await saveGameState({
+          difficulty: currentMode,
+          attempts: newAttempts,
+          isPlaying: false,
+          gameOver: true,
+          score: newScore,
+          time,
+        });
+
         await saveResult(true);
       } else if (newAttempts >= MAX_ATTEMPTS) {
         toast.error('Você esgotou suas tentativas.');
         setGameOver(true);
+
+        resultForm.setValue('isCorrect', false);
+        resultForm.setValue('timeTaken', time);
+        resultForm.setValue('difficulty', currentMode);
+
+        await saveGameState({
+          difficulty: currentMode,
+          attempts: newAttempts,
+          isPlaying: false,
+          gameOver: true,
+          score,
+          time,
+        });
+
         await saveResult(false);
       } else {
         toast.error(`Incorreto. Tentativa ${newAttempts}/${MAX_ATTEMPTS}`);
         setUserAnswer('');
+        answerForm.reset();
       }
 
       setSubmitting(false);
     } catch (error: any) {
       console.error('Erro ao verificar resposta:', error);
-      toast.error(error.message || 'Erro ao verificar resposta');
+      toast.error(
+        error.response?.data?.error ||
+          error.message ||
+          'Erro ao verificar resposta',
+      );
       setSubmitting(false);
     }
   };
 
   const saveResult = async (isCorrect: boolean) => {
     try {
-      const formData = new FormData();
-      formData.append('isCorrect', isCorrect.toString());
-      formData.append('timeTaken', time.toString());
-      formData.append('difficulty', currentMode);
-
       startTransition(async () => {
-        const result = await saveGameResult(formData);
+        const { data: result } = await axios.post('/api/game/save-result', {
+          isCorrect,
+          timeTaken: time,
+          difficulty: currentMode,
+        });
 
         if (!result.success) {
           throw new Error(result.error || 'Erro ao salvar resultado');
@@ -107,7 +203,11 @@ export default function DailyChordGame() {
       });
     } catch (error: any) {
       console.error('Erro ao salvar resultado:', error);
-      toast.error(error.message || 'Erro ao salvar resultado');
+      toast.error(
+        error.response?.data?.error ||
+          error.message ||
+          'Erro ao salvar resultado',
+      );
     }
   };
 
