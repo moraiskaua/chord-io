@@ -93,7 +93,7 @@ export default function DailyChordGame() {
   useEffect(() => {
     loadGameState();
     loadPreviousResults();
-  }, [loadGameState]);
+  }, []);
 
   useEffect(() => {
     if (alreadyPlayed[currentMode] && isPlaying) {
